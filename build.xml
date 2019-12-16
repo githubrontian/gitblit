@@ -53,6 +53,13 @@
 
 		<!-- Download links -->
 		<property name="gc.url" value="http://dl.bintray.com/gitblit/releases/" />
+
+		<!-- Report Java version -->
+		<echo>JDK version: ${ant.java.version}</echo>
+		<exec executable="javac">
+			<arg value="-version" />
+		</exec>
+		<echo>Java/JVM version: ${java.version}</echo>
 	</target>
 
 	
@@ -132,6 +139,11 @@
 	-->
 	<target name="test" depends="compile" description="compiles Gitblit from source and runs unit tests">
 		
+		<!-- Generate the HelloworldKeys class from the hello-world.properties file -->
+		<mx:keys propertiesfile="${basedir}/src/test/data/hello-world.properties"
+			 	outputclass="com.gitblit.tests.HelloworldKeys"
+			 	todir="${basedir}/src/test/java" />
+
 		<!-- Compile unit tests -->
 		<mx:javac scope="test" />
 		
@@ -193,7 +205,6 @@
 		<!-- Build jar -->
 		<mx:jar destfile="${go.release.dir}/gitblit.jar" includeresources="true">
 			<mainclass name="com.gitblit.GitBlitServer" />
-			<launcher paths="ext" />
 		</mx:jar>
 
 		<!-- Generate the docs for the GO build -->
@@ -297,7 +308,6 @@
 			excludes="**/.class, **/*.java, **/Thumbs.db, **/*.mkd, **/*.md, **/*.css, com/gitblit/wicket/**">
 			<mainclass name="com.gitblit.FederationClient" />
 			<class name="com.gitblit.Keys" />
-			<launcher paths="ext" />
 			<resource file="${project.compileOutputDirectory}/log4j.properties" />
 		</mx:genjar>
 		
@@ -368,7 +378,7 @@
 				</fileset>
 			</resource>
 
-			<mainclass name="com.gitblit.client.GitblitManagerLauncher" />
+			<mainclass name="com.gitblit.client.GitblitManager" />
 			<class name="com.gitblit.Keys" />
 			<class name="com.gitblit.client.GitblitClient" />
 			<class name="com.gitblit.models.FederationModel" />
@@ -599,8 +609,9 @@
 			<replace token="%GCURL%" value="${gc.url}" />
 			
 			<properties token="%PROPERTIES%" file="${project.distrib.dir}/data/defaults.properties" />
-			
-			<regex searchPattern="\b(issue)(\s*[#]?|-){0,1}(\d+)\b" replacePattern="&lt;a href='http://code.google.com/p/gitblit/issues/detail?id=$3'&gt;issue $3&lt;/a&gt;" />
+
+			<regex searchPattern="\b(commit)(\s*[#]?|-){0,1}([0-9a-fA-F]{5,})\b" replacePattern="&lt;a href='https://github.com/gitblit/gitblit/commit/$3'&gt;commit $3&lt;/a&gt;" />
+			<regex searchPattern="\b(issue)(\s*[#]?|-){0,1}(\d+)\b" replacePattern="&lt;a href='https://github.com/gitblit/gitblit/issues/$3'&gt;issue $3&lt;/a&gt;" />
 			<regex searchPattern="\b(pr|pull request)(\s*[#]?|-){0,1}(\d+)\b" replacePattern="&lt;a href='https://github.com/gitblit/gitblit/pull/$3'&gt;pull request #$3&lt;/a&gt;" />
 			<regex searchPattern="\b(ticket)(\s*[#]?|-){0,1}(\d+)\b" replacePattern="&lt;a href='https://dev.gitblit.com/tickets/gitblit.git/$3'&gt;ticket $3&lt;/a&gt;" />
 			
